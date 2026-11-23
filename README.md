@@ -4,11 +4,13 @@ An Obsidian plugin for citing the Westminster Standards and the Three Forms of U
 
 **AI-assisted development.** This plugin was built with AI coding assistance. Bugs and transcription errors are possible. If you plan to quote or publish a passage, check the wording against the linked source edition. Please report discrepancies or plugin bugs through GitHub Issues.
 
-## Install from a GitHub release
+## Install in Obsidian
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the GitHub release. In your vault, create `.obsidian/plugins/confession-reference/` and copy the three files into it.
-2. Restart Obsidian, then enable **Confession Reference** under **Settings → Community plugins**.
-3. In an editable note, type one of these references and choose a suggestion.
+Once Confession Reference is listed in the Obsidian Community directory, open **Settings → Community plugins → Browse** and search for **Confession Reference**. Select **Install**, then **Enable**. Obsidian creates the plugin folder and downloads the files for you.
+
+## Use Confession Reference
+
+In an editable note, type one of these references and choose a suggestion.
 
 | Type | Reference |
 | --- | --- |
@@ -22,7 +24,12 @@ An Obsidian plugin for citing the Westminster Standards and the Three Forms of U
 
 By default, suggestions insert a Markdown link labeled with the precise citation. The link opens the source document. In plugin settings, enable **Insert quotations** to paste historical quotations from all six documents as callouts with a linked reference and edition. Link mode points Three Forms of Unity citations to the CRCNA documents.
 
-To upgrade, copy the new `main.js`, `manifest.json`, and `styles.css` into the installed plugin folder. Keep the existing `data.json` to preserve your preferences. Reload Obsidian after syncing these files to other devices.
+## Manual installation from GitHub
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [GitHub release](https://github.com/JPBigs/confession-reference/releases/latest). In your vault, create `.obsidian/plugins/confession-reference/` and copy the three files into it.
+2. Restart Obsidian, then enable **Confession Reference** under **Settings → Community plugins**.
+
+To update a manual installation, replace those three files and keep `data.json` to preserve your preferences. Reload Obsidian after syncing these files to other devices.
 
 ## Data and privacy
 
