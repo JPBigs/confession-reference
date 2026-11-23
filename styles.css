@@ -1,0 +1,14 @@
+.callout[data-callout="confession"] {
+  --callout-icon: lucide-scroll-text;
+  --callout-color: 105, 113, 123;
+  background-color: #f0f1f2;
+}
+
+.theme-dark .callout[data-callout="confession"] {
+  --callout-color: 155, 168, 181;
+  background-color: #181b1e;
+}
+
+.callout[data-callout="confession"] .callout-icon {
+  color: var(--link-external-color);
+}

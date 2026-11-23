@@ -1,0 +1,6 @@
+{
+  "name": "confession-reference",
+  "version": "0.3.4",
+  "private": true,
+  "scripts": {"build": "node build.cjs", "test": "node --test"}
+}

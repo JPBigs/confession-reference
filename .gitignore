@@ -1,0 +1,8 @@
+main.js
+node_modules/
+.obsidian/
+data.json
+.env
+.env.*
+*.key
+*.pem
