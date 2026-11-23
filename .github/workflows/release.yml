@@ -1,0 +1,46 @@
+name: Release Obsidian plugin
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Validate release version
+        run: |
+          node <<'JS'
+          const tag = process.env.GITHUB_REF_NAME;
+          const versions = [require('./manifest.json').version, require('./package.json').version];
+          if (!versions.every(version => version === tag)) {
+            throw new Error(`Release tag ${tag} must match the manifest and package versions`);
+          }
+          JS
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: |
+            main.js
+            styles.css
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css \
+            --verify-tag --title "Confession Reference $GITHUB_REF_NAME" --generate-notes
