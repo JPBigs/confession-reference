@@ -2,7 +2,7 @@
 
 An Obsidian plugin for citing the Westminster Standards and the Three Forms of Unity.
 
-**AI-assisted development.** This plugin was built with AI coding assistance (sometimes called vibe coding). Bugs and transcription errors are possible. If you plan to quote or publish a passage, check the wording against the linked source edition. Please report discrepancies or plugin bugs through GitHub Issues.
+**AI-assisted development.** This plugin was built with AI coding assistance. Bugs and transcription errors are possible. If you plan to quote or publish a passage, check the wording against the linked source edition. Please report discrepancies or plugin bugs through GitHub Issues.
 
 ## Install in Obsidian
 
