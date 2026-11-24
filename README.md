@@ -22,7 +22,7 @@ In an editable note, type one of these references and choose a suggestion.
 | `;;dort 3/4.11` | Canons of Dort, Third and Fourth Heads, Article 11 |
 | `;;dort 5.r1` | Canons of Dort, Fifth Head, Rejection of Errors 1 |
 
-By default, suggestions insert a Markdown link labeled with the precise citation. The link opens the source document. In plugin settings, enable **Insert quotations** to paste historical quotations from all six documents as callouts with a linked reference and edition. Link mode points Three Forms of Unity citations to the CRCNA documents.
+By default, suggestions insert a Markdown link labeled with the precise citation. The link opens the source document. In plugin settings, enable **Insert quotations** to paste historical quotations from all six documents as callouts with a linked reference and edition.
 
 ## Quote a translation from your vault
 
@@ -61,8 +61,7 @@ The lookup runs offline. There are no runtime dependencies beyond Obsidian. The 
 
 - **Westminster Standards.** The [Creeds.json transcription](https://github.com/NonlinearFruit/Creeds.json/tree/2ae21a4c5387ecc91f474c9d3d67c826d2a6b9d5) is provided under the [Unlicense](https://unlicense.org/). The source metadata identifies historical print editions. The plugin includes the main text and catechism questions and omits proof texts.
 - **Heidelberg Catechism and Belgic Confession.** The [Heidelberg](https://reformedchurch.com/confessions/heidelberg-catechism) and [Belgic](https://reformedchurch.com/confessions/belgic-confession) transcriptions use the public-domain English wording in Philip Schaff's [*The Creeds of Christendom*, vol. III (1877)](https://commons.wikimedia.org/wiki/File:The_creeds_of_Christendom_-_with_a_history_and_critical_notes_(IA_creedschristendo03scha).pdf).
-- **Canons of Dort.** Quotes use the public-domain English translation by Thomas Scott in [*The Articles of the Synod of Dort* (Philadelphia, Presbyterian Board of Publication, 1841), pp. 260–330](https://upload.wikimedia.org/wikipedia/commons/7/7f/The_articles_of_the_Synod_of_Dort_%28IA_articlesofsynodo1841syno%29.pdf#page=266). The transcription includes the numbered articles and Rejections of Errors, with footnotes and other unnumbered material omitted. The final rejection is indexed as 5.r9 because the printing repeats 8. Link mode opens the [CRCNA edition](https://www.crcna.org/welcome/beliefs/confessions/canons-dort).
-- **Modern CRCNA wording.** It is available through source links. Any future bundled edition depends on permission from the rights holder.
+- **Canons of Dort.** Quotes use the public-domain English translation by Thomas Scott in [*The Articles of the Synod of Dort* (Philadelphia, Presbyterian Board of Publication, 1841), pp. 260–330](https://upload.wikimedia.org/wikipedia/commons/7/7f/The_articles_of_the_Synod_of_Dort_%28IA_articlesofsynodo1841syno%29.pdf#page=266). The transcription includes the numbered articles and Rejections of Errors, with footnotes and other unnumbered material omitted. The final rejection is indexed as 5.r9 because the printing repeats 8.
 
 ## Build and verify
 
