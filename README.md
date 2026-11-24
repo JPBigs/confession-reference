@@ -21,12 +21,15 @@ In an editable note, type one of these references and choose a suggestion.
 | `;;bc 29` | Belgic Confession Article 29 |
 | `;;dort 3/4.11` | Canons of Dort, Third and Fourth Heads, Article 11 |
 | `;;dort 5.r1` | Canons of Dort, Fifth Head, Rejection of Errors 1 |
+| `;;canons 3/4.r1` | Canons of Dort, Third and Fourth Heads, Rejection of Errors 1 |
+
+For Dort rejections, put `r` before the rejection number. Type `;;dort 5.r` to browse rejections under the Fifth Head. Both `;;canons` and `;;cannons` work anywhere you would type `;;dort`.
 
 By default, suggestions insert a Markdown link labeled with the precise citation. The link opens the source document. In plugin settings, enable **Insert quotations** to paste historical quotations from all six documents as callouts with a linked reference and edition.
 
 ## Quote a translation from your vault
 
-In **Settings → Confession Reference**, find the document under **Editions for quotations** and select **Add edition**. Paste your translation with its original headings and numbering, and enter a source link. **Save to vault** creates an editable Markdown note, enables quotations, and reports how many citations it detected.
+In **Settings → Confession Reference**, find the document under **Editions for quotations** and select **Add edition**. Paste your translation with its original headings and numbering, and enter a source link. **Save to vault** creates an editable Markdown note in the vault’s **Confession Reference Editions** folder, enables quotations, and reports how many citations it detected.
 
 To use an existing Markdown note, select **Use note** in the same dialog and find the file in the vault picker. You can search by name or folder path. Include the document’s name in the note title, a single `Source: https://…` line near the top, and the text with its original headings and numbering. Use text you have the right to copy and store.
 
@@ -44,7 +47,7 @@ Paste the next article here.
 
 Each document has its own edition setting. When **Insert quotations** is enabled, citations use the selected note’s text and source link when available. If the note or citation is missing, the plugin uses the default historical edition identified under that document in settings and in **Text sources** below. Select **Use default** on a document to switch it back.
 
-The plugin recognizes common chapter and section numbers, articles, catechism questions, and Dort heads and rejections. For other layouts, add a heading such as `## dort 1.2` above the passage. Inserted quotations omit recognized numbered Scripture footnotes and their matching inline markers. The saved edition note retains the original pasted text.
+The plugin recognizes common chapter and section numbers, articles, catechism questions, and Dort heads and rejections. For other layouts, add a heading such as `## dort 1.2` above an article or `## dort 3/4.r1` above a rejection. Inserted quotations omit recognized numbered Scripture footnotes and their matching inline markers. The saved edition note retains the original pasted text.
 
 ## Manual installation from GitHub
 

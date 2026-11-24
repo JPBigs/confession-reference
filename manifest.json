@@ -1,7 +1,7 @@
 {
   "id": "confession-reference",
   "name": "Confession Reference",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "minAppVersion": "1.5.0",
   "description": "Look up and insert references to the historic Reformed confessions and catechisms.",
   "author": "Confession Reference contributors",

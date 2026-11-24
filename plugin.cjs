@@ -1,4 +1,4 @@
-const { EditorSuggest, Plugin, PluginSettingTab, Setting, Notice, Modal, TFile, FuzzySuggestModal } = require("obsidian");
+const { EditorSuggest, Plugin, PluginSettingTab, Setting, Notice, Modal, TFile, TFolder, FuzzySuggestModal } = require("obsidian");
 
 class ConfessionSuggest extends EditorSuggest {
   constructor(plugin) {
@@ -24,7 +24,10 @@ class ConfessionSuggest extends EditorSuggest {
       if (!editions.has(path)) editions.set(path, this.plugin.readEdition(path));
       const edition = await editions.get(path);
       const body = edition?.entries.get(entry.key);
-      return body ? { ...entry, body, question: undefined, personalEdition: edition.name, personalSource: edition.source } : entry;
+      return body ? {
+        ...entry, body, heading: edition.headings.get(entry.key), question: undefined,
+        personalEdition: edition.name, personalSource: edition.source,
+      } : entry;
     }));
   }
 
@@ -150,6 +153,8 @@ class ConfessionSettings extends PluginSettingTab {
   }
 }
 
+const editionFolder = "Confession Reference Editions";
+
 const documents = [
   { key: "wcf", name: "Westminster Confession of Faith", bundled: "Westminster Assembly’s English text, 1647 printing" },
   { key: "wsc", name: "Westminster Shorter Catechism", bundled: "Westminster Assembly’s English text, 1647 printing" },
@@ -238,9 +243,18 @@ class PersonalEditionModal extends Modal {
       let file;
       try {
         const vault = this.app.vault;
-        let path = `${title}.md`;
+        if (!(vault.getAbstractFileByPath(editionFolder) instanceof TFolder)) {
+          try {
+            await vault.createFolder(editionFolder);
+          } catch (error) {
+            if (!(vault.getAbstractFileByPath(editionFolder) instanceof TFolder)) throw error;
+          }
+        }
+
+        const basePath = `${editionFolder}/${title}`;
+        let path = `${basePath}.md`;
         for (let index = 2; vault.getAbstractFileByPath(path); index++) {
-          path = `${title} ${index}.md`;
+          path = `${basePath} ${index}.md`;
         }
         file = await vault.create(path, markdown);
         this.plugin.editionNotes[key] = file.path;

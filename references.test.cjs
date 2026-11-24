@@ -24,6 +24,9 @@ test("supports all six documents and distinguishes the Dort heads and rejections
   for (const key of ["wcf 1.6", "wsc 1", "wlc 45", "hc 1", "bc 29", "dort 3/4.11", "dort 5.r1"]) {
     assert.equal(lookup(entries, key)[0].key, key.replaceAll(" ", ""));
   }
+  assert.deepEqual(lookup(entries, "cannons"), lookup(entries, "dort"));
+  assert.equal(lookup(entries, "canons 3/4.r1")[0].key, "dort3/4.r1");
+  assert.deepEqual(lookup(entries, "CANNONS 5.r"), lookup(entries, "dort 5.r"));
   assert.equal(lookup(entries, "dort 4.1").length, 0);
   assert.equal(lookup(entries, "dort 5.16").length, 0);
 });
@@ -99,8 +102,10 @@ test("Dort quotes cite Scott's printed pages and link mode opens the CRCNA editi
     const entry = lookup(entries, key)[0];
     assert.equal(entry.edition, `Thomas Scott (1841), ${pages}`);
     assert.equal(entry.quoteUrl, `https://upload.wikimedia.org/wikipedia/commons/7/7f/The_articles_of_the_Synod_of_Dort_%28IA_articlesofsynodo1841syno%29.pdf#page=${startPage + 6}`);
+    const heading = key.startsWith("dort 5.r")
+      ? `> **Fifth Head of Doctrine · Rejection of Errors ${key.split(".r")[1]}**\n>\n` : "";
     assert.ok(format(entry, true).startsWith(
-      `> [!confession] [${entry.label} - ${entry.edition}](${entry.quoteUrl})\n> ${opening}`,
+      `> [!confession] [${entry.label} - ${entry.edition}](${entry.quoteUrl})\n${heading}> ${opening}`,
     ));
     assert.equal(format(entry, false), `[${entry.label}](https://www.crcna.org/welcome/beliefs/confessions/canons-dort)`);
   }
@@ -120,6 +125,13 @@ test("parses a pasted full document with one source URL and original numbering",
     const edition = readVaultEdition(`# ${title}\nSource: https://example.org/edition\n\n${content}`, "My translation");
     assert.equal(edition.source, "https://example.org/edition");
     assert.equal(edition.entries.get(key), body, title);
+    if (key === "dort3/4.r1") {
+      assert.equal(edition.headings.get("dort3/4.1"), "Article 1 — Heading");
+      assert.equal(edition.headings.get(key), "Rejection 1");
+      assert.match(format({
+        key, heading: edition.headings.get(key), label: "Canons of Dort", edition: title, body,
+      }, true), /Third and Fourth Heads of Doctrine · Rejection of Errors 1/);
+    }
   }
 });
 
@@ -163,7 +175,7 @@ test("registered suggester uses vault text and shared source in quote mode only"
   assert.equal(plugin.editionNotes.hc, "Edition.md");
   assert.equal((await match("bc 1")).personalEdition, undefined);
   plugin.editionNotes.bc = "Belgic.md";
-  assert.equal((await match("bc 1")).body, "Personal Belgic wording.");
+  assert.match(format(await match("bc 1"), true), /> \*\*Article 1\*\*\n>\n> Personal Belgic wording\./);
   assert.equal((await match("hc 1")).body, "Edited wording.");
   await plugin.saveSettings();
   assert.equal(plugin.saved.editionsByDocument.bc, "Belgic.md");
@@ -199,4 +211,70 @@ test("omits pasted Scripture footnotes and skips navigation between questions", 
   ].join("\n"));
   assert.equal(edition.entries.get("hc3"), "A different passage.");
   assert.equal(edition.entries.get("hc80"), "An editorial mark belongs to this entry.*");
+});
+
+test("imports Roman-numbered Westminster website text with lettered Scripture notes", () => {
+  const { readVaultEdition } = require("./references.cjs");
+  const markdown = [
+    "I. Of the Holy Scripture",
+    "I. The light of nature leaves men inexcusable;a yet Scripture is necessary.b",
+    "a.Psa 19:1-3; Rom 1:19-20. • b. 1 Cor 1:21.",
+    "II. The books of the Old and New Testaments are these:",
+    "Of the Old Testament",
+    "Genesis. Exodus. I Samuel.",
+    "All are given by inspiration.a",
+    "a. Luke 16:29, 31.",
+    "Back to the top.",
+    "II. Of God, and of the Holy Trinity",
+    "I. There is but one onlya living and true God,b eternal;cinfinite in power.d",
+    "a. Deut 6:4. • b. Jer 10:10. • c. Psa 90:2. • d. Rev 4:8.",
+    "Back to the top.",
+    "XIX. Of the Law of God",
+    "VII. The seventh section.",
+    "VI. The sixth section.",
+    "XXXIII. Of the Last Judgment",
+    "III. The last section.",
+    "Back to the top.",
+  ].join("\n");
+  const { entries, headings } = readVaultEdition(markdown, "Westminster Confession of Faith");
+  const heading = headings.get("wcf1.1");
+  assert.equal(heading, "I. Of the Holy Scripture · Section I");
+  assert.equal(headings.get("wcf19.6"), "XIX. Of the Law of God · Section VI");
+  assert.ok(format({
+    label: "Westminster Confession 1.1", edition: "Personal edition", heading, body: entries.get("wcf1.1"),
+  }, true).includes("> **I. Of the Holy Scripture · Section I**\n>\n> The light of nature"));
+  assert.deepEqual([...entries], [
+    ["wcf1.1", "The light of nature leaves men inexcusable; yet Scripture is necessary."],
+    ["wcf1.2", "The books of the Old and New Testaments are these:\nOf the Old Testament\nGenesis. Exodus. I Samuel.\nAll are given by inspiration."],
+    ["wcf2.1", "There is but one only living and true God, eternal; infinite in power."],
+    ["wcf19.7", "The seventh section."],
+    ["wcf19.6", "The sixth section."],
+    ["wcf33.3", "The last section."],
+  ]);
+});
+
+test("reads website rejections from standalone Roman numerals in a personal Dort edition", () => {
+  const { readVaultEdition } = require("./references.cjs");
+  const source = "https://www.crcna.org/welcome/beliefs/confessions/canons-dort";
+  const markdown = [
+    "Source: " + source,
+    "The First Main Point of Doctrine", "Article 1: An article", "", "Personal article.",
+    "Rejection of the Errors by Which the Dutch Churches Have for Some Time Been Disturbed",
+    "Having set forth the orthodox teaching, the Synod rejects the errors of those",
+    "I", "", "First rejection.", "", "Response.", "II", "", "Second rejection.",
+    "Back to top",
+    "The Third and Fourth Main Points of Doctrine", "Article 1: Another article",
+    "Rejection of the Errors", "## I.", "Combined heads rejection.",
+    "The Fifth Main Point of Doctrine", "Article 1: Final head article",
+    "Rejection of the Errors Concerning the Teaching of the Perseverance of the Saints",
+    "IX", "Final rejection.", "Conclusion", "Conclusion paragraph.",
+  ].join("\n");
+  const edition = readVaultEdition(markdown, "Canons of Dort - Personal edition");
+  assert.equal(edition.source, source);
+  assert.equal(edition.entries.get("dort1.r1"), "First rejection.\n\nResponse.");
+  assert.equal(edition.entries.get("dort1.r2"), "Second rejection.");
+  assert.equal(edition.entries.get("dort3/4.r1"), "Combined heads rejection.");
+  assert.equal(edition.entries.get("dort5.r9"), "Final rejection.");
+  assert.equal(edition.headings.get("dort5.r9"), "Rejection IX");
+  assert.ok(edition.entries.has("dort5.1"));
 });
