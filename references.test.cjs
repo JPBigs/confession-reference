@@ -45,10 +45,13 @@ test("built plugin registers suggestions and replaces only the typed reference",
     EditorSuggest: class {},
     Plugin: class {
       async loadData() { return {quote: false}; }
+      async saveData(data) { this.saved = data; }
       registerEditorSuggest(suggester) { this.suggester = suggester; }
       addSettingTab() {}
     },
     PluginSettingTab: class {},
+    Modal: class {},
+    FuzzySuggestModal: class {},
   };
   const sandbox = { module: {exports: {}}, require: name => {
     assert.equal(name, "obsidian");
@@ -67,7 +70,7 @@ test("built plugin registers suggestions and replaces only the typed reference",
   };
   const context = plugin.suggester.onTrigger({line: 0, ch: line.length}, editor);
   plugin.suggester.context = {...context, editor};
-  plugin.suggester.selectSuggestion(plugin.suggester.getSuggestions(context)[0]);
+  plugin.suggester.selectSuggestion((await plugin.suggester.getSuggestions(context))[0]);
   assert.match(line, /^See \[Heidelberg Catechism Q&A 1\]/);
 });
 
@@ -101,4 +104,99 @@ test("Dort quotes cite Scott's printed pages and link mode opens the CRCNA editi
     ));
     assert.equal(format(entry, false), `[${entry.label}](https://www.crcna.org/welcome/beliefs/confessions/canons-dort)`);
   }
+});
+
+test("parses a pasted full document with one source URL and original numbering", () => {
+  const { readVaultEdition } = require("./references.cjs");
+  const cases = [
+    ["Westminster Confession of Faith", "## Chapter XVI\n1. First paragraph.\n2. Second paragraph.", "wcf16.2", "Second paragraph."],
+    ["Heidelberg Catechism", "Q. 1. My question\nA. My answer", "hc1", "My question\nA. My answer"],
+    ["Westminster Shorter Catechism", "## Q&A 1\nFirst answer.", "wsc1", "First answer."],
+    ["Westminster Larger Catechism", "Question 2. Question\nAnswer", "wlc2", "Question\nAnswer"],
+    ["Belgic Confession", "### Article XXIX: The marks\nArticle body.", "bc29", "Article body."],
+    ["Canons of Dort", "## Third and Fourth Heads of Doctrine\n### Article 1: Heading\nArticle body.\n## Rejection of Errors\n1. Rejection body.", "dort3/4.r1", "Rejection body."],
+  ];
+  for (const [title, content, key, body] of cases) {
+    const edition = readVaultEdition(`# ${title}\nSource: https://example.org/edition\n\n${content}`, "My translation");
+    assert.equal(edition.source, "https://example.org/edition");
+    assert.equal(edition.entries.get(key), body, title);
+  }
+});
+
+test("registered suggester uses vault text and shared source in quote mode only", async () => {
+  class TFile {
+    extension = "md";
+    basename = "My Heidelberg Catechism";
+  }
+  const file = new TFile();
+  const belgic = Object.assign(new TFile(), { basename: "My Belgic Confession" });
+  let text = "Source: https://example.org/edition\nQuestion 1. Personal wording.";
+  const obsidian = {
+    TFile,
+    EditorSuggest: class {},
+    Plugin: class {
+      app = { vault: {
+        getAbstractFileByPath: path => ({ "Edition.md": file, "Belgic.md": belgic })[path],
+        cachedRead: async note => note === file ? text : "Article 1. Personal Belgic wording.",
+      } };
+      async loadData() { return { quote: true, personalNote: "Edition.md" }; }
+      async saveData(data) { this.saved = data; }
+      registerEditorSuggest(suggester) { this.suggester = suggester; }
+      addSettingTab() {}
+    },
+    PluginSettingTab: class {},
+    Modal: class {},
+    FuzzySuggestModal: class {},
+  };
+  const sandbox = { module: { exports: {} }, require: () => obsidian, URL };
+  vm.runInNewContext(fs.readFileSync("main.js", "utf8"), sandbox);
+  const plugin = new sandbox.module.exports();
+  await plugin.onload();
+  const match = async query => (await plugin.suggester.getSuggestions({ query }))[0];
+
+  const personal = await match("hc 1");
+  assert.match(format(personal, true), /My Heidelberg Catechism\]\(https:\/\/example.org\/edition\)\n> Personal wording/);
+  assert.equal(personal.question, undefined);
+  assert.equal((await match("hc 2")).personalEdition, undefined);
+  text = text.replace("Personal wording", "Edited wording");
+  assert.equal((await match("hc 1")).body, "Edited wording.");
+  assert.equal(plugin.editionNotes.hc, "Edition.md");
+  assert.equal((await match("bc 1")).personalEdition, undefined);
+  plugin.editionNotes.bc = "Belgic.md";
+  assert.equal((await match("bc 1")).body, "Personal Belgic wording.");
+  assert.equal((await match("hc 1")).body, "Edited wording.");
+  await plugin.saveSettings();
+  assert.equal(plugin.saved.editionsByDocument.bc, "Belgic.md");
+  assert.equal(plugin.saved.editionsByDocument.hc, "Edition.md");
+  plugin.editionNotes.hc = "Missing.md";
+  assert.equal((await match("hc 1")).personalEdition, undefined);
+  assert.equal((await match("bc 1")).body, "Personal Belgic wording.");
+  plugin.editionNotes.hc = "Edition.md";
+  plugin.quote = false;
+  assert.match(format(await match("hc 1"), false), /https:\/\/www.crcna.org/);
+});
+
+test("omits pasted Scripture footnotes and skips navigation between questions", () => {
+  const { readVaultEdition } = require("./references.cjs");
+  const markdown = [
+    "Lord’s Day 1", "Q & A 1", "A sample sentence.1",
+    "Another phrase—2 followed by ordinary text.",
+    "A third reference: 3", "An inline citation stays as Acts 2:1-3.",
+    "", "1 1 Cor. 6:19-20", "2Matt. 3:16-17; 28:18-19",
+    "3 Acts 14:15-17/a>; Prov. 22:2", "Back to top",
+    "Part I: Misery", "Lord’s Day 2", "Q & A 3",
+    "A different passage.1", "1 Ps. 8", "Q & A 80*",
+    "An editorial mark belongs to this entry.*", "Additional Translations",
+    "Site navigation that should be ignored.",
+  ].join("\n");
+  const edition = readVaultEdition(markdown, "Heidelberg Catechism - Test");
+  const first = edition.entries.get("hc1");
+  assert.equal(first, [
+    "A sample sentence.",
+    "Another phrase— followed by ordinary text.",
+    "A third reference:",
+    "An inline citation stays as Acts 2:1-3.",
+  ].join("\n"));
+  assert.equal(edition.entries.get("hc3"), "A different passage.");
+  assert.equal(edition.entries.get("hc80"), "An editorial mark belongs to this entry.*");
 });

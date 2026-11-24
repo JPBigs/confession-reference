@@ -12,3 +12,9 @@
 .callout[data-callout="confession"] .callout-icon {
   color: var(--link-external-color);
 }
+
+.confession-reference-edition-text {
+  min-height: 10em;
+  width: max(20ch, 100%);
+  resize: vertical;
+}

@@ -2,7 +2,7 @@
 
 An Obsidian plugin for citing the Westminster Standards and the Three Forms of Unity.
 
-**AI-assisted development.** This plugin was built with AI coding assistance. Bugs and transcription errors are possible. If you plan to quote or publish a passage, check the wording against the linked source edition. Please report discrepancies or plugin bugs through GitHub Issues.
+**AI-assisted development.** This plugin was built with AI coding assistance (sometimes called vibe coding). Bugs and transcription errors are possible. If you plan to quote or publish a passage, check the wording against the linked source edition. Please report discrepancies or plugin bugs through GitHub Issues.
 
 ## Install in Obsidian
 
@@ -24,6 +24,28 @@ In an editable note, type one of these references and choose a suggestion.
 
 By default, suggestions insert a Markdown link labeled with the precise citation. The link opens the source document. In plugin settings, enable **Insert quotations** to paste historical quotations from all six documents as callouts with a linked reference and edition. Link mode points Three Forms of Unity citations to the CRCNA documents.
 
+## Quote a translation from your vault
+
+In **Settings → Confession Reference**, find the document under **Editions for quotations** and select **Add edition**. Paste your translation with its original headings and numbering, and enter a source link. **Save to vault** creates an editable Markdown note, enables quotations, and reports how many citations it detected.
+
+To use an existing Markdown note, select **Use note** in the same dialog and find the file in the vault picker. You can search by name or folder path. Include the document’s name in the note title, a single `Source: https://…` line near the top, and the text with its original headings and numbering. Use text you have the right to copy and store.
+
+```markdown
+# Canons of Dort — My edition
+Source: https://example.org/my-edition
+
+## First Head of Doctrine
+### Article 1
+Paste the article here.
+
+### Article 2
+Paste the next article here.
+```
+
+Each document has its own edition setting. When **Insert quotations** is enabled, citations use the selected note’s text and source link when available. If the note or citation is missing, the plugin uses the default historical edition identified under that document in settings and in **Text sources** below. Select **Use default** on a document to switch it back.
+
+The plugin recognizes common chapter and section numbers, articles, catechism questions, and Dort heads and rejections. For other layouts, add a heading such as `## dort 1.2` above the passage. Inserted quotations omit recognized numbered Scripture footnotes and their matching inline markers. The saved edition note retains the original pasted text.
+
 ## Manual installation from GitHub
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the [GitHub release](https://github.com/JPBigs/confession-reference/releases/latest). In your vault, create `.obsidian/plugins/confession-reference/` and copy the three files into it.
@@ -33,7 +55,7 @@ To update a manual installation, replace those three files and keep `data.json` 
 
 ## Data and privacy
 
-The lookup runs offline. There are no runtime dependencies beyond Obsidian. The plugin uses the active editor to suggest references and replaces the typed trigger when you choose an entry. It stores the quote preference in the plugin settings. Following a source link opens the corresponding site in your browser.
+The lookup runs offline. There are no runtime dependencies beyond Obsidian. The plugin uses the active editor to suggest references and replaces the typed trigger when you choose an entry. It stores the quote preference and saved edition note paths and your selection in the plugin settings. Your pasted translation stays in the vault note. Quotes you insert are copied into the note you are editing. Following a source link opens the corresponding site in your browser.
 
 ## Text sources
 
@@ -46,7 +68,7 @@ The lookup runs offline. There are no runtime dependencies beyond Obsidian. The 
 
 Use Node.js 20 or newer. Run `npm run build` to regenerate `main.js`, then `npm test`. There is no dependency installation step.
 
-The automated checks cover citation lookup, insertion, and bundle registration using an Obsidian API stub. The automated checks use a stub for the Obsidian API. To check app compatibility, install the built files in a test vault and try link insertion and quote mode on desktop and mobile.
+The automated checks cover citation lookup, insertion, vault editions, and bundle registration using an Obsidian API stub. To check app compatibility, install the built files in a test vault and try link insertion and quote mode on desktop and mobile.
 
 ## License
 
